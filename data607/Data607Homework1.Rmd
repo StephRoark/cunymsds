@@ -1,0 +1,93 @@
+---
+title: "Data 607 Homework 1"
+author: "Stephanie Roark"
+date: "9/2/2018"
+output:
+  html_document:
+    highlight: pygments
+    theme: cosmo
+  pdf_document: default
+---
+
+
+## Moldy old Mushroom Data
+
+###Load libraries and read in the data 
+```{r load mushroom data, eval=TRUE, message=FALSE}
+library(RCurl)
+library(dplyr)
+mush_url <- getURL('https://archive.ics.uci.edu/ml/machine-learning-databases/mushroom/agaricus-lepiota.data')
+mush_data <- read.csv(text = mush_url, header = FALSE,sep = ",",stringsAsFactors = FALSE )
+head(mush_data)
+```
+
+###Rename columns from the data dictionary
+```{r read and rename colnames, eval=TRUE}
+colnames(mush_data) <- c('edibility', 'cap_shape', 'cap_surface', 'cap_color', 'bruises', 'odor', 'gill attachment', 'gill spacing', 'gill size', 'gill color', 'stalk shape', 'stalk root', 'stalk surface above ring', 'stalk surface below ring', 'stalk color above ring', 'stalk color above ring', 'veil type', 'veil color', 'ring number', 'ring type', 'spore print color', 'population', 'habitat')
+
+head(mush_data)
+```
+
+###Choose a subset of collumns:
+
+```{r subset dataframe, eval=TRUE}
+mush_data_cols <- subset(mush_data, select = edibility:odor)
+head(mush_data_cols)
+```
+
+###Give meaningful values to data
+```{r replace data abbreviations , eval=TRUE}
+mush_data_cols$edibility = ifelse( mush_data_cols$edibility == "p" , "poisonous", "edible")
+
+mush_data_cols$cap_shape = case_when( 
+    mush_data_cols$cap_shape == "b" ~ "bell",
+    mush_data_cols$cap_shape == "c" ~ "conical",
+    mush_data_cols$cap_shape == "x" ~ "convex",
+    mush_data_cols$cap_shape == "f" ~ "flat",
+    mush_data_cols$cap_shape == "k" ~ "knobbed",
+    mush_data_cols$cap_shape == "s" ~ "sunken",
+    TRUE ~ mush_data_cols$cap_shape
+    )
+
+mush_data_cols$cap_surface = case_when( 
+    mush_data_cols$cap_surface == "f" ~ "fibrous",
+    mush_data_cols$cap_surface == "g" ~ "grooves",
+    mush_data_cols$cap_surface == "y" ~ "scaly",
+    mush_data_cols$cap_surface == "s" ~ "smooth",
+    TRUE ~ mush_data_cols$cap_surface
+    )
+
+mush_data_cols$cap_color = case_when( 
+    mush_data_cols$cap_color == "n" ~ "brown",
+    mush_data_cols$cap_color == "b" ~ "buff",
+    mush_data_cols$cap_color == "c" ~ "cinnamon",
+    mush_data_cols$cap_color == "g" ~ "gray",
+    mush_data_cols$cap_color == "r" ~ "green",
+    mush_data_cols$cap_color == "p" ~ "pink",
+    mush_data_cols$cap_color == "u" ~ "purple",
+    mush_data_cols$cap_color == "e" ~ "red",
+    mush_data_cols$cap_color == "w" ~ "white",
+    mush_data_cols$cap_color == "y" ~ "yellow",
+    TRUE ~ mush_data_cols$cap_color
+    )
+mush_data_cols$bruises = ifelse( mush_data_cols$bruises == "t" , "bruises", "no")
+
+mush_data_cols$odor = case_when( 
+    mush_data_cols$odor == "a" ~ "almond",
+    mush_data_cols$odor == "l" ~ "anise",
+    mush_data_cols$odor == "c" ~ "creosote",
+    mush_data_cols$odor == "y" ~ "fishy",
+    mush_data_cols$odor == "f" ~ "foul",
+    mush_data_cols$odor == "m" ~ "musty",
+    mush_data_cols$odor == "n" ~ "none",
+    mush_data_cols$odor == "p" ~ "pungent",
+    mush_data_cols$odor == "s" ~ "spicy",
+    TRUE ~ mush_data_cols$odor
+    )
+```
+
+##Final subset of the Mushroom Data with meaningful column and data names
+```{r look at final, eval=TRUE}
+head(mush_data_cols)
+```
+
