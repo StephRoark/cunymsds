@@ -1,0 +1,77 @@
+---
+title: "Data607Homework2"
+author: "Stephanie Roark"
+date: "9/9/2018"
+output:
+  html_document:
+    theme: cosmo
+    highlight: pygments
+---
+
+#Assignment – SQL and R
+
+Choose six recent popular movies. Ask at least five people that you know (friends, family, classmates,
+imaginary friends) to rate each of these movie that they have seen on a scale of 1 to 5. Take the results
+(observations) and store them in a SQL database. Load the information into an R dataframe.
+
+###Reading from the Database
+
+Connecting to MySql and reading in the reviews and movies tables from the movies database.
+
+```{r get password prompt, eval=TRUE, echo=FALSE}
+#Rmd will not knit with this password prompt, but code works stand alone. Add your password in place of dbPassword.
+dbPassword <- rstudioapi::askForPassword()
+movie_db = dbConnect(MySQL(), user='root', password=dbPassword, dbname='Movies', host='localhost')
+
+```
+
+```{r read in the tables - database,   eval=TRUE }
+library(DBI)
+library(RMySQL)
+
+movie_db = dbConnect(MySQL(), user='root', password=dbPassword, dbname='Movies', host='localhost')
+
+reviews <- dbGetQuery(movie_db, "SELECT * FROM reviewers ORDER BY movie_ID, UsersName")
+
+movies <- dbGetQuery(movie_db, "SELECT movies.Title, AVG(movies.Rotten_Rating), AVG(reviewers.Reviewer_Rating) FROM movies INNER JOIN  reviewers ON movies.movie_ID = reviewers.movie_ID GROUP BY movies.Title")
+```
+
+##Reviews Table
+
+Each person gave a rating and a review for each of the 10 recent popular movies.
+
+```{r reviews table, eval=TRUE}
+str(reviews)
+colnames(reviews) <- c('MovieID', 'ReviewerName', 'Rating', 'Review')
+reviews
+```
+
+##Movies Tables
+
+Each movie is listed with the Rotten Tomatoes average rating and the sample reviewers average ratings.
+
+```{R movies table, eval=TRUE}
+str(movies)
+colnames(movies) <- c('Title', 'RottenTomatesRating', 'AvgReviewerRating')
+movies
+
+```
+
+## Comparing Rotten Tomatoes Ratings to Sample Ratings
+
+We plot the ratings side by side to compare the Rotten Tomatoes ratings with our sample reviewers ratings.
+
+```{r change col names and plot, eval=TRUE}
+
+colours = c("red","green")
+par(mar=c(5,9,4,4))
+barplot(t(as.matrix(movies[2:3])), 
+        main="Movie Ratings", xlab = "Average Rating",
+        names.arg = movies$Title, horiz = TRUE, las = 1,
+        cex.lab = 1, cex.main = 1.4, 
+        cex.names = 0.5,
+        beside=TRUE, col=colours)
+par(xpd=TRUE)
+legend(-2,-4, c("Rotten Tomatoes","Personal Reviewer"), 
+       cex=0.8, bty="n", fill=colours)
+```
