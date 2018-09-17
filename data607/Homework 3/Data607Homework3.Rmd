@@ -1,0 +1,100 @@
+---
+title: "Data 607 Homework 3"
+author: "Stephanie Roark"
+date: "9/16/2018"
+output:output:
+  html_document:
+    theme: cosmo
+    highlight: pygments
+---
+
+## Extracting the names from the Simpson's Phone Directory
+
+
+```{r data}
+raw.data <-("555-1239Moe Szyslak(636) 555-0113Burns, C. Montgomery555-6542Rev. Timothy Lovejoy555 8904Ned Flanders636-555-3226Simpson, Homer5553642Dr. Julius Hibbert")
+```
+
+## Question 3
+### a) Use the tools of this chapter to rearrange the vector so that all the elements conform to the standard first_name last_name.
+
+```{r extract the names, eval=TRUE}
+library(stringr)
+name <- str_extract_all(raw.data, "[[:alpha:]., ]{2,}")
+name
+# Check for ",". If no comma, is first_name last_name, if yes comma, reverse to make first_name last-name
+reverse <- function(full_name) {
+    fl_name <- ifelse(str_detect(full_name,","),
+                      paste( str_split(full_name, ", ")[[1]][[2]], str_split(full_name, ", ")[[1]][[1]] ),
+                      full_name)
+    str_split( str_replace(fl_name, "[[:alpha:]]{1,}\\. ", ""), " ")
+}
+Simpson_names <- lapply(name[[1]], reverse)
+Simpson_names
+```
+
+### b) Construct a logical vector indicating whether a character has a title.
+```{r has title?, eval=TRUE}
+has_title <- function(full_name) !is.na(str_extract(full_name, "[[:alpha:]]{2,}\\."))
+name
+lapply(name, has_title)
+```
+
+### c) Construct a logical vector indicating whether a character has a second name
+```{r has second name?, eval=TRUE}
+has_secname <- function(full_name) !is.na(str_extract(full_name, "\\b[[:alpha:]]{1,1}\\."))
+has_secname <- function(full_name) !is.na(str_extract(full_name, "\\b[[:alpha:]]{1,1}\\."))
+name
+lapply(name, has_secname)
+```
+
+## Question 4
+### Describe the types of strings that conform to the following regular expressions and construct an example that is matched by the regular expression.
+
+### a) [0-9]+\\$
+
+One or more numbers followed by a dollar sign
+
+```{r}
+str_detect("12345$", "[0-9]+\\$")
+```
+
+### b) \\b[a-z]{1,4}\\b
+
+A lower case character string that is between 1 to 4 letters long
+
+```{r}
+str_detect("asgf","\\b[a-z]{1,4}\\b") # TRUE
+```
+
+### c) .*?\\.txt$
+
+0 or more (ungreedy) digits of any character followed by a . and txt with nothing after the txt
+In other words a name of a text file ending .txt
+
+```{r}
+str_detect("jad34.txt", ".*?\\.txt$") # TRUE
+```
+
+### d) \\d{2}/\\d{2}/\\d{4}
+
+2 digits / 2 digits/ 4 digits
+which would match a date such as 09/16/2018
+
+```{r}
+str_detect("01/01/2018","\\d{2}/\\d{2}/\\d{4}")
+```
+
+### e) <(.+?)>.+?</\\1>
+
+A character string of any length between <> and </> as in an html tag. 
+<html>I really love regex!!!!!!!!!!!</html>
+
+```{r}
+str_detect("<html>I really love regex!!!!!!!!!!!</html>","<(.+?)>.+?</\\1>")
+```
+
+
+
+
+
