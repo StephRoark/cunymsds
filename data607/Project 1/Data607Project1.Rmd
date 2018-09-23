@@ -1,0 +1,160 @@
+---
+title: "Data 607 Project 1"
+author: "Stephanie Roark"
+date: "9/22/2018"
+output:output:
+  html_document:
+    theme: cosmo
+    highlight: pygments
+---
+
+## Exporting Chess Tournament Data to .csv
+
+In this project, you’re given a text file with chess tournament results where the information has some structure. Your
+job is to create an R Markdown file that generates a .CSV file (that could for example be imported into a SQL database)
+with the following information for all of the players:
+Player’s Name, Player’s State, Total Number of Points, Player’s Pre-Rating, and Average Pre Chess Rating of Opponents
+
+For the first player, the information would be:
+Gary Hua, ON, 6.0, 1794, 1605
+
+1605 was calculated by using the pre-tournament opponents’ ratings of 1436, 1563, 1600, 1610, 1649, 1663, 1716, and
+dividing by the total number of games played.
+
+
+```{r read in data, eval=TRUE}
+library(stringr)
+
+filename <- "tournamentinfo.txt"
+
+# Create a function to read in and structure the data
+
+readTournamentFile <- function(filename, skip = 4, warn = FALSE) {
+  lines <- readLines(filename, warn = warn)
+  
+  # Make one record by line
+  recordPerLine <- c()
+  for(i in seq(from=skip+1, to=length(lines), by=3)) {
+    recordPerLine <- c(recordPerLine,paste(lines[i],lines[i+1]) ) 
+  }
+  
+  # Split the records up based on the | delimiter
+  records <- str_split(recordPerLine, "\\|")
+  
+  # Make a data frame from the table, one record at a time
+  dd <- as.data.frame( t( unlist(records[1]) ) )
+  for(i in 2:length(records)) {
+    dd_t <- as.data.frame( t( unlist(records[i]) ) )
+    dd <- rbind(dd, dd_t)
+  }
+  
+  # Add column names 
+  colnames( dd ) <- c("Player Number", "Player Name", "Total", 
+                      "Rnd 1 Result", "Rnd 2 Result", "Rnd 3 Result", "Rnd 4 Result", "Rnd 5 Result", "Rnd 6 Result", "Rnd 7 Result", 
+                      "Player State", "USCF ID / Rtg (Pre->Post)", "DONTKNOW",
+                      "Rnd 1 Color", "Rnd 2 Color", "Rnd 3 Color", "Rnd 4 Color", "Rnd 5 Color", "Rnd 6 Color", "Rnd 7 Color",
+                      "DONTCARE") 
+  
+  # Get rid of whitespace
+  dd2 <- as.data.frame(apply(dd,2,function(x)gsub('\\s+', '',x)))
+  
+  # Fix player names (too much white space removed)
+  dd2$`Player Name` <- trimws( as.character(dd$`Player Name`) )
+  
+  # Do extractions
+  dd2 <- cbind( dd2, `UCSF ID`=str_extract( dd2$`USCF ID / Rtg (Pre->Post)`, "[[:digit:]]+") ) 
+  
+  # Pre tournament rating
+  dd2 <- cbind( dd2, `Pre Rating`=str_extract( dd2$`USCF ID / Rtg (Pre->Post)`, "(?<=\\:)[[:digit:]]+") )
+  
+  # Round results 
+
+  dd2 <- cbind( dd2, `Round 1 Opponent`=str_extract(dd2$`Rnd 1 Result`, "[[:digit:]]+") )
+  dd2 <- cbind( dd2, `Round 2 Opponent`=str_extract(dd2$`Rnd 2 Result`, "[[:digit:]]+") )
+  dd2 <- cbind( dd2, `Round 3 Opponent`=str_extract(dd2$`Rnd 3 Result`, "[[:digit:]]+") )
+  dd2 <- cbind( dd2, `Round 4 Opponent`=str_extract(dd2$`Rnd 4 Result`, "[[:digit:]]+") )
+  dd2 <- cbind( dd2, `Round 5 Opponent`=str_extract(dd2$`Rnd 5 Result`, "[[:digit:]]+") )
+  dd2 <- cbind( dd2, `Round 6 Opponent`=str_extract(dd2$`Rnd 6 Result`, "[[:digit:]]+") )
+  dd2 <- cbind( dd2, `Round 7 Opponent`=str_extract(dd2$`Rnd 7 Result`, "[[:digit:]]+") )
+  
+  # Fix types
+  
+  dd2$`Pre Rating` <- as.numeric(as.character(dd2$`Pre Rating`))
+  dd2$`Total` <- as.numeric(as.character(dd2$`Total`))
+  dd2$`Player Number` <- as.character(dd2$`Player Number`)
+  dd2$`Round 1 Opponent` <- as.character(dd2$`Round 1 Opponent`)
+  dd2$`Round 2 Opponent` <- as.character(dd2$`Round 2 Opponent`)
+  dd2$`Round 3 Opponent` <- as.character(dd2$`Round 3 Opponent`)
+  dd2$`Round 4 Opponent` <- as.character(dd2$`Round 4 Opponent`)
+  dd2$`Round 5 Opponent` <- as.character(dd2$`Round 5 Opponent`)
+  dd2$`Round 6 Opponent` <- as.character(dd2$`Round 6 Opponent`)
+  dd2$`Round 7 Opponent` <- as.character(dd2$`Round 7 Opponent`)
+
+  # Remove unneeded columns 
+  
+  dd2$DONTCARE <- NULL
+  dd2$DONTKNOW <- NULL
+  dd2$`USCF ID / Rtg (Pre->Post)` <- NULL
+  dd2$`UCSF ID`<- NULL
+  dd2$`Rnd 1 Result` <- NULL
+  dd2$`Rnd 2 Result` <- NULL
+  dd2$`Rnd 3 Result` <- NULL
+  dd2$`Rnd 4 Result` <- NULL
+  dd2$`Rnd 5 Result` <- NULL
+  dd2$`Rnd 6 Result` <- NULL
+  dd2$`Rnd 7 Result` <- NULL
+  dd2$`Rnd 1 Color` <- NULL
+  dd2$`Rnd 2 Color` <- NULL
+  dd2$`Rnd 3 Color` <- NULL
+  dd2$`Rnd 4 Color` <- NULL
+  dd2$`Rnd 5 Color` <- NULL
+  dd2$`Rnd 6 Color` <- NULL
+  dd2$`Rnd 7 Color` <- NULL
+
+  dd2
+}
+
+#Run function on text file 
+
+data_chess <- readTournamentFile(filename)
+
+head(data_chess)
+
+#Collect pre-rating scores and take the average
+
+preavgscores <- c()
+for(i in data_chess$`Player Number`) {
+    row <- data_chess[ data_chess$`Player Number` == i,  ]
+    opp1pre <- data_chess[ data_chess$`Player Number` == row$`Round 1 Opponent`, ]$`Pre Rating`
+    opp2pre <- data_chess[ data_chess$`Player Number` == row$`Round 2 Opponent`, ]$`Pre Rating`
+    opp3pre <- data_chess[ data_chess$`Player Number` == row$`Round 3 Opponent`, ]$`Pre Rating`
+    opp4pre <- data_chess[ data_chess$`Player Number` == row$`Round 4 Opponent`, ]$`Pre Rating`
+    opp5pre <- data_chess[ data_chess$`Player Number` == row$`Round 5 Opponent`, ]$`Pre Rating`
+    opp6pre <- data_chess[ data_chess$`Player Number` == row$`Round 6 Opponent`, ]$`Pre Rating`
+    opp7pre <- data_chess[ data_chess$`Player Number` == row$`Round 7 Opponent`, ]$`Pre Rating`
+    avgpre <- round(mean(c(opp1pre,opp2pre,opp3pre,opp4pre,opp5pre,opp6pre,opp7pre),na.rm = TRUE),0)
+    preavgscores <- c(preavgscores,avgpre)
+}
+
+data_chess <- cbind(data_chess,`Avg Opp Rating`=preavgscores)
+
+#Remove unneeded columns
+
+data_chess$`Round 1 Opponent` <- NULL
+data_chess$`Round 2 Opponent` <- NULL
+data_chess$`Round 3 Opponent` <- NULL
+data_chess$`Round 4 Opponent` <- NULL
+data_chess$`Round 5 Opponent` <- NULL
+data_chess$`Round 6 Opponent` <- NULL
+data_chess$`Round 7 Opponent` <- NULL
+data_chess$`Player Number` <- NULL
+
+#Final result
+
+data_chess
+
+# Create a .csv file
+
+write.csv(data_chess, "ChessPlayerData.csv", row.names=FALSE)
+
+```
