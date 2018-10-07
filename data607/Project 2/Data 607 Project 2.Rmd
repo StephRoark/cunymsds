@@ -1,0 +1,140 @@
+---
+title: "Data 607 Project 2"
+author: "Stephanie Roark"
+date: "10/7/2018"
+output:
+  html_document:
+    theme: cosmo
+    highlight: pygments
+---
+
+#Tidy Data 
+
+##Part: 1 San Francisco Mobile Food Truck Permits
+
+###Are there really taco trucks on every corner?
+
+
+After reading in the data and changing all empty spaces to NA, remove the permits that are expired or suspended so that we only have active permitted trucks and carts. Then spread the food items into separate rows in order to anazlyze what foods are being served. I also excluded cold truck and hot truck from the foods items listed as they aren't actual food types. 
+
+```{r foodtruck data, eval=TRUE, warning=FALSE, message=FALSE}
+library(tidyverse)
+
+foodtruck_data <- read_csv("Mobile_Food_Facility_Permit.csv", col_names = TRUE, na= c("", "NA"), trim_ws = TRUE)
+
+foodtruck_long <- 
+    foodtruck_data %>%
+    select(Applicant, FacilityType, Status, FoodItems) %>%
+    filter(Status != "EXPIRED") %>%
+    filter(Status != "SUSPEND") %>%
+    drop_na() %>%
+    separate_rows(FoodItems ,sep=":|;|\\.") %>%
+    mutate(FoodItems = tolower(trimws(FoodItems))) %>%
+    filter(FoodItems != "cold truck") %>%
+    filter(FoodItems != "hot truck") %>%
+    filter(FoodItems != "")
+```
+
+###How many food trucks serve tacos in San Francisco?
+
+```{r tacos, eval=TRUE}
+foodtruck_long %>% filter(FacilityType == "Truck") %>% filter( grepl("taco", FoodItems) ) %>% count()
+
+foodtruck_long %>% 
+    count(FoodItems) %>%
+    top_n(10, n) %>%
+    arrange(desc(n))
+
+```
+
+####There are only 80 foodtrucks that serve tacos and those can't possibly be on every corner of San Francisco. Candy, snacks, sandwiches and even burritos are far more popular than tacos!
+
+##Part: 2 New York City Restaurant Inspections
+
+###Which cuisine gets the most critical violations proportionally?
+
+Begin with reading in the data and selecting the columns to look at cuisine and critical violations. Then I rename columns to remove spaces and remove cuisine types sych as not applicable and not listed and spread the dataset to show proportional criticality by cuisine type arranging by percentage.
+
+```{r read NYC health, eval=TRUE, message=FALSE, warning=FALSE}
+NYC_Restaurant_Inspection_Results <- read_csv("DOHMH_New_York_City_Restaurant_Inspection_Results.csv")
+
+NYC_Restaurant_Health <- 
+    NYC_Restaurant_Inspection_Results %>%
+    select("DBA", "BORO", "CUISINE DESCRIPTION", "CRITICAL FLAG")
+
+colnames(NYC_Restaurant_Health) <- c("DBA", "BORO", "CUISINE", "CRITICALITY")
+
+NYC_Restaurant_Health_Clean <-
+    NYC_Restaurant_Health %>%
+    filter(CRITICALITY != "Not Applicable") %>%
+    filter(CUISINE != "Not Listed/Not Applicable") %>%
+    count(CUISINE, CRITICALITY) %>%
+    mutate(CRITICALITY = ifelse(CRITICALITY=="Critical","Critical","NotCritical")) %>%
+    spread(CRITICALITY, n) %>%
+    mutate(PERCENTCRITICAL = Critical / (Critical + `NotCritical`)) %>%
+    arrange(desc(PERCENTCRITICAL)) 
+```
+
+###What are the top 10 cuisines with critical violations?
+
+Select the top 10 cuisines with the highest critical percentages for violations.
+
+```{r best NYC, eval=TRUE}
+NYC_Restaurant_Health_Clean %>% top_n(10, PERCENTCRITICAL)
+```
+
+####I think I would skip the Creole or Creole/Cajun and Bangladeshi cuisine restaurants!
+####And what exactly is Chinese/Cuban food?
+
+
+###What are the bottom 10 cuisines with critical violations?
+
+Select the 10 cuisines which correspond to the lowest critical percentages for violations.
+
+```{r worst NYC, eval=TRUE}
+NYC_Restaurant_Health_Clean %>% top_n(-10, PERCENTCRITICAL)
+```
+
+####Ice cream looks pretty safe though.
+
+##Part 3: 30 Years of Simpsons
+
+###What are the most and least watched Simpsons Episodes?
+
+###What does viewership look like over the seasons?
+
+Reading in the dataset and plotting to see the viewership by episode and by season.
+
+```{r simpsons, eval=TRUE, warning=FALSE, message=FALSE}
+simpsons_data <- read_csv("simpsons_episodes.csv")
+
+ggplot(data = simpsons_data) +
+    aes(x = number_in_series, y = us_viewers_in_millions, color = number_in_season) +
+    geom_line() +
+    scale_color_distiller(palette = "RdYlGn") 
+```
+
+####Viewers seem to tune in towards the end of the each season and viewership has declined significantly over the course of 30 years. However there does seem to be a pickup in viewership in the between the 10th and 15th seasons.
+
+
+###What are the top 5 most viewed Simpsons Episodes?
+
+Selecting the top 5 titles viewed and arranging in descending order by viewership.
+
+```{r most viewed, eval=TRUE}
+simpsons_data %>% top_n(5, us_viewers_in_millions) %>% 
+    select(title, us_viewers_in_millions, season, number_in_season) %>%
+    arrange(desc(us_viewers_in_millions))
+```
+
+###What are the bottom 5 least viewed Simpsons Episodes?
+
+Selecting the bottom 5 titles viewed and arranging by viewership.
+
+```{r least viewed, eval=TRUE}
+simpsons_data %>% top_n(-5, us_viewers_in_millions) %>% 
+    select(title, us_viewers_in_millions, season, number_in_season) %>%
+    arrange(desc(us_viewers_in_millions))
+
+```
+
