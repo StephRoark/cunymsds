@@ -1,0 +1,25 @@
+<Cookbooks>
+	<book>
+	 <title>Chez Panisse Vegetables</title>
+	 <author>Alice Waters</author>
+	 <attributes>Vegetarian</attributes>
+	 <attributes>California</attributes>
+	 <attributes>Cookbook</attributes>
+	</book>
+	<book>
+	 <title>Plenty</title>
+	 <author>Yotam Ottolenghi</author>
+	 <attributes>Vegetarian</attributes>
+	 <attributes>English</attributes>
+	 <attributes>Cookbook</attributes>
+	</book>
+	<book>
+	 <title>Artisan Ice Cream</title>
+	 <author>Laura O'Neill</author>
+	 <author>Benjamin Van Leeuwen</author> 
+	 <author>Peter Van Leeuwen</author>
+	 <attributes>Dessert</attributes>
+	 <attributes>New York City</attributes>
+	 <attributes>Cookbook</attributes>
+	</book>
+</Cookbooks>
