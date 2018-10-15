@@ -1,0 +1,84 @@
+---
+title: "Data 607 Homework 7"
+author: "Stephanie Roark"
+date: "10/14/2018"
+output:
+  html_document:
+    theme: cosmo
+    highlight: pygments
+---
+
+
+## Working with XML and JSON in R
+
+Pick three of your favorite books on one of your favorite subjects. At least one of the books should have more than one author. For each book, include the title, authors, and two or three other attributes that you find interesting.
+
+Take the information that you’ve selected about these three books, and separately create three files which store the book’s information in HTML (using an html table), XML, and JSON formats (e.g. “books.html”, “books.xml”, and “books.json”). To help you better understand the different file structures, I’d prefer that you create each of these files “by hand” unless you’re already very comfortable with the file formats.
+
+Write R code, using your packages of choice, to load the information from each of the three sources into separate R data frames. Are the three data frames identical?
+
+####Of the three tables, HTML was the closest to looking like a table when read in  to R; this is because HTML reader recognizes HTML tables and reads each HTML table in a file into a seperate data frame directly.  JSON read each record in row by row, using the JSON label as the vector entry names; using rbind of all the records yields a data structure ready to be turned into a data frame.  XML operated much like JSON, except the data needed to be transposed before turning into a data frame.  knitr::kable was used to print each resultant data frame for ease of comparison. See below how each one differs initially:
+
+### HTML
+
+
+```{r html, eval=TRUE, warning=FALSE, message=FALSE}
+library(XML)
+library(RCurl)
+
+html.url <- "https://raw.githubusercontent.com/StephRoark/cunymsds/master/data607/Homework7/books.html"
+
+#read in the url
+HTML_data <- getURL(html.url)
+
+#read the html from the web page
+html.data <- readHTMLTable(HTML_data, stringsAsFactors=FALSE)
+html.data
+#display the html data as a table
+knitr::kable(html.data[[1]])
+
+```
+
+### JSON
+
+```{r json, eval=TRUE}
+library(RJSONIO)
+JSON_data <- getURL("https://raw.githubusercontent.com/StephRoark/cunymsds/master/data607/Homework7/books.json")
+
+#read in the json from the web page
+json.data <- fromJSON(JSON_data)
+json.data
+
+# bind each entry in list into a row of a data frame
+json.df <- data.frame( do.call("rbind", json.data$books) )
+
+#display the json data as a table
+knitr::kable(json.df)
+```
+
+
+### XML
+
+```{r XML, eval=TRUE, warning=FALSE, message=FALSE}
+XML_url <- "https://raw.githubusercontent.com/StephRoark/cunymsds/master/data607/Homework7/books.xml"
+
+#read in the XML data
+XML_data <- getURL(XML_url)
+
+#parse the XML data
+xmlfile <- xmlTreeParse(XML_data)
+
+#get the top node of the file
+topxml <- xmlRoot(xmlfile)
+
+#use apply function to extract the contents of each node
+topxml <- xmlSApply(topxml,
+                    function(x) xmlSApply(x, xmlValue))
+topxml
+
+#put content in a data frame
+xml_df <- data.frame(t(topxml),
+                     row.names=NULL)
+#display the json data as a table
+knitr::kable(xml_df)
+```
