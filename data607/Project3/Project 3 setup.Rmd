@@ -1,0 +1,54 @@
+---
+title: "Project 3 Data Science Skills"
+author: "Chad Bailey, Mike Groysman, Zach Herold, Stephanie Roark"
+date: "10/21/2018"
+output: html_document
+---
+
+##Project - Data Science Skills
+
+####W. Edwards Deming said, “In God we trust, all others must bring data.” Please use data to answer the question,“Which are the most valued data science skills?” 
+
+
+####Team : Chad Bailey, Mike Groysman, Zach Herold, Stephanie Roark
+
+####1. Collaboration Tools
+    a. Slack used for general communication.
+    b. GitHub used for storing and sharing files, articles, and scripts. 
+    c. Rpubs used to publish documentation and presentation.
+    d. Google Drive used to share articles and project information.
+    
+####2. Data to collect
+    a. HTML converted to JSON file, converted to CSV using R
+        -  December 2015 Chart describing Top 20 Skills of a Data Scientist originated in an article on smartdatacollective.com which referred to another article called The State Of Data Science on stitchdata.com. The data to create the chart was gathered by analyzing the profiles of over 11,000 self-identified data scientists, looking at 245,000 skill records.The resulting dataset read into R from the scraped json file is a .csv with 20 rows and 2 columns. The chart describes the top 20 skills by percentile ranking and can be found here: https://s3.amazonaws.com/com.stitchdata.ops.assets/benchmark/stitch-data-science/fig_10.html
+        
+    b. CSV’s files from Kaggle: The Most in Demand Skills for Data Scientists by Jeff Hale
+        - Kaggle dataset 1 ds_job_listing_technology: This October 2018 dataset is a list of technology mentioned in joblistings on LinkedIn, Indeed, SimplyHired, and Monster.The data is in .csv form and contains 44 rows and 12 columns. 
+            https://www.kaggle.com/discdiver/ds-job-listing-technology
+        - Kaggle dataset 2 Data Scientist General Skills 2018 Revised: This October 2018 dataset is a list of general skills listed for Data Science jobs listed on LinkedIn, Indeed, Simply Hired, and Monster. The dataset is a .csv with 30 rows and 5 columns. 
+            https://www.kaggle.com/discdiver/data-scientist-general-skills-2018-revised
+            
+####3. MySQL Project3 Schema
+    a. Table1 to hold HTML/JSON CSV data (df20ssv.csv)
+    b. Table2 to hold Kaggle dataset 1 (ds_general_skills_revisted.csv)
+    c. Table3 to hold Kaggle dataset 2 )df_job_listing_software.csv)
+    
+####4. R step (not completed)
+    a. Analysis
+    b. Visualizations
+####5. Deliverables
+    a. SQL code
+    b. R codes
+    c. Results (R markdown?)
+    d. Documentation
+        - How data was collected
+            - HTML converted to JSON file, converted to CSV using R
+            - CSV files collected from Kaggle
+        - How data was loaded
+        - How data was transformed iV) How data was tidied
+        - Data analysis
+        - Motivation
+        - Approach
+        - Findings
+####6. Presentation
+
