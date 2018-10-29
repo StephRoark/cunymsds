@@ -1,0 +1,72 @@
+---
+title: "Data 607 Homework 9"
+author: "Stephanie Roark"
+date: "10/28/2018"
+output: html_document
+---
+
+##Web APIs
+
+The New York Times web site provides a rich set of APIs, as described here: http://developer.nytimes.com/docs. You’ll need to start by signing up for an API key.
+Your task is to choose one of the New York Times APIs, construct an interface in R to read in the JSON data, and transform it to an R dataframe.
+
+I will begin with an articles API search at the NY Times for articles containing the key word saturn between the dates of October 1, 2018 to October 31, 2018 and read in the first page.
+
+```{r API-key, echo=FALSE}
+API_Key <- "41b4486612504266abff1fd84bb42620"
+```
+
+```{r json, eval=TRUE, message=FALSE, warning=FALSE}
+library(jsonlite)
+library(httr)
+library(tidyverse)
+
+API_url <- paste0("https://api.nytimes.com/svc/search/v2/articlesearch.json?q=saturn?begin_date=20181001?end_date=20181031&api-key=", API_Key)
+
+NY_search <- fromJSON(API_url, flatten = TRUE) %>% data.frame()
+
+#str(NY_search)
+ncol(NY_search)
+nrow((NY_search))
+```
+
+So, now I have a dataframe with 10 observations of 29 variables.
+
+```{r maxpages, eval=TRUE}
+baseurl <- API_url
+initialQuery <- fromJSON(baseurl)
+maxPages <- ((initialQuery$response$meta$hits[1] / 10)-1) 
+maxPages
+```
+
+The query only read in the first of 784 pages returned in the search and each page has 10 articles. In total there are 7836 articles returned by the keyword search for Saturn. That's an amazing number of articles on Saturn from 10-01-18 to 10-31-18.
+
+Now read in 4 pages total to get a few more articles:
+
+```{r 4pages, eval=TRUE}
+pages <- list()
+for(i in 0:3){
+    nytSearch <- fromJSON(paste0(baseurl, "&page=", i), flatten = TRUE) %>% data.frame() 
+    message("Retrieving page ", i)
+    pages[[i+1]] <- nytSearch 
+    Sys.sleep(1) 
+}
+allNYTSearch <- rbind_pages(pages)
+```
+
+Now that I have the dataframe with approximately 40 articles, I will select just the information about articles and display the headlines, snippets and authors.
+
+```{r articles, eval=TRUE}
+
+NYTimes_saturn_articles <- allNYTSearch %>% 
+    filter(response.docs.document_type == "article") %>%
+    select(Headline = response.docs.headline.main, Author = response.docs.byline.original, Summary = response.docs.snippet)
+```
+
+I now we have a dataframe with 31 observations of 3 variables printed as a table.
+
+```{r print, eval=TRUE}
+str(NYTimes_saturn_articles)
+
+knitr::kable(NYTimes_saturn_articles)
+```
