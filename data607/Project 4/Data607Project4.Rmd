@@ -1,0 +1,181 @@
+---
+title: "Data 607 Project 4"
+author: "Stephanie Roark"
+date: "11/4/2018"
+output:
+  html_document:
+    highlight: pygments
+    theme: cosmo
+---
+
+#Is it Spam or Ham?
+
+We begin by loading the relevant packages:
+
+```{r libraries, eval=TRUE, warning=FALSE, message=FALSE}
+library(tm)
+library(wordcloud)
+library(e1071)
+library(gmodels)
+library(SnowballC)
+```
+
+The data are loaded and examined. This dataset can be found on kaggle and other places and contains 2 columns and 5574 rows or observations of either spam or ham emails.
+
+```{r spamdata, eval=TRUE}
+spam <- read.csv('sms_spam.csv')
+str(spam)
+table(spam$type)
+```
+
+In order to examine the emails to find the most frequent words, we create a bag of words by breaking apart the email sentences, removing any numbers, punctuation, and stopwords, as well as converting the words to lower case and breaking them into their word root parts. We use the TermDocumentMatrix function to perform all tasks at once.
+
+```{r spam/ham, eval=TRUE, warning=FALSE, message=FALSE}
+
+# create bag of words from the dataset, convert to lowercase and remove numbers, puncuation, stopwords, word stems
+corpus <- VCorpus(VectorSource(spam$text)) 
+tdm <- TermDocumentMatrix(corpus, control = list(
+    tolower = TRUE,
+    removeNumbers = TRUE,
+    removePunctuation = TRUE,
+    stemming = TRUE,
+    stopwords = TRUE
+))
+
+str(tdm)
+inspect(tdm)
+```
+
+Then we convert the bag of words to a matrix, collect the frequency for each word, and create a data frame with the word and it's frequency. Now we can display a word cloud of the top 50 most frequently used words in the dataset.
+
+```{r wordcloud, eval=TRUE}
+#Convert TDM to matrix, collect word frequencies, create a data frame with each word & freq
+m <- as.matrix(tdm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+
+#Create word cloud of top 50 words
+wordcloud(d$word,d$freq, scale=c(4,1), max.words = 50, random.order = FALSE)
+```
+
+Next we will split apart the data into either spam or ham so that we can examine the most frequent words in each group independently.
+
+###Ham WordCloud
+
+```{r ham_messages, eval=TRUE}
+
+#separate data into spam and ham
+spam_messages <- subset(spam,type=="spam")
+ham_messages <- subset(spam, type=="ham")
+
+# create ham bag of words
+corpus <- VCorpus(VectorSource(ham_messages$text)) 
+tdm_ham <- TermDocumentMatrix(corpus, control = list(
+    tolower = TRUE,
+    removeNumbers = TRUE,
+    removePunctuation = TRUE,
+    stemming = TRUE,
+    stopwords = TRUE
+))
+
+str(tdm_ham)
+inspect(tdm_ham)
+
+#Convert tdm_ham to matrix, collect word frequencies, create a data frame with each word & freq
+m <- as.matrix(tdm_ham)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+
+#Create word cloud of top 50 ham words
+wordcloud(d$word,d$freq, scale=c(4,.5), max.words = 50, random.order = FALSE)
+```
+
+Some of the most common ham words are love, want, got, just, will, now, can, like, call, get, dont, day, know, time. These are very expressive and personal words to use and suggest a closer relationship between the sender and receiver of the email.
+
+###Spam WordCloud
+
+```{r spam_messages, eval=TRUE}
+# spam bag of words
+corpus <- VCorpus(VectorSource(spam_messages$text)) 
+tdm_spam <- TermDocumentMatrix(corpus, control = list(
+    tolower = TRUE,
+    removeNumbers = TRUE,
+    removePunctuation = TRUE,
+    stemming = TRUE,
+    stopwords = TRUE
+))
+
+str(tdm_spam)
+inspect(tdm_spam)
+
+#Convert tdm_spam to matrix, collect word frequencies, create a data frame with each word & freq
+m <- as.matrix(tdm_spam)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+
+#Create word cloud of top 50 spam words
+wordcloud(d$word,d$freq, scale=c(5,1), max.words = 50, random.order = FALSE)
+```
+
+Some of the most common words in the spam wordcloud are call, text, now, urgent, prize, cash, get, free, mobil, stop, week, etc. These words are more intent on creating a sense of urgency. Interesting that call shows up in both spam and ham emails! Perhaps call is a word that is used frequently in language in general.
+
+###Modeling spam vs ham
+
+In order to model the dataset to make predictions on an email being either spam or ham, we must first break up the data into a train and test set, with 75% of the data in the training set and withholding 25% to test against. We can see in the tables that the data is split in a way that is representative of the the train/test sets.
+
+```{r traintest, eval=TRUE}
+n <- nrow(spam)
+trainLabels <-spam[1:floor(n * 0.75),]$type
+testLabels <- spam[(floor(n * 0.75)+1):n,]$type
+prop.table(table(trainLabels))
+prop.table(table(testLabels))
+
+dtm <- t(tdm)
+ndtm <- nrow(dtm)
+dtmTrain <- dtm[1:floor(ndtm * 0.75),]
+dtmTest <- dtm[(floor(ndtm * 0.75)+1):ndtm,]
+```
+
+We can also choose to reduce the number of words to a selection of the most frequently seen words in the dataset.
+
+```{r freqwords, eval=TRUE}
+freqWords <- findFreqTerms(dtmTrain,5)
+freqTrain <- dtmTrain[,freqWords]
+freqTest <- dtmTest[,freqWords]
+
+convert_counts <- function(x) {
+    x <- ifelse(x > 0, "Yes", "No")
+}
+```
+
+And finally we are ready to train the model which in this case is a NaiveBayes Classifier. 
+
+First we train the model against the training data:
+
+```{r model, eval=TRUE}
+train <- apply(freqTrain, MARGIN = 2,
+               convert_counts)
+test <- apply(freqTest, MARGIN = 2,
+              convert_counts)
+
+classifier <- naiveBayes(train, trainLabels)
+```
+
+From the word cloud, we saw that the word call shows up in both spam and ham emails, however the prevalence is much greater in the spam set.
+
+```{r call, eval=TRUE}
+classifier[2]$tables$call
+```
+
+And then we test our model using the withheld test data. We can display the model's results in a table:
+
+```{r testmodel, eval=TRUE}
+testPredict <- predict(classifier, test)
+CrossTable(testPredict, testLabels,
+           prop.chisq = FALSE, prop.t = FALSE,
+           dnn = c('predicted', 'actual'))
+```
+
+We have 9 missed ham and 20 missed spam from a total of 1394 which is not too bad but certainly not perfect.
+
+We could potentially improve the model's performance by fine tuning using the laplace argument to perform laplace smoothing.
