@@ -1,0 +1,91 @@
+---
+title: "Homework12"
+author: "Stephanie Roark"
+date: "11/25/2018"
+params:
+  dbPassword: "to be completed interactively"
+output:
+  html_document:
+    theme: cosmo
+---
+
+##MySQL to NoSQL
+
+For this assignment, you should take information from a relational database and migrate it to a NoSQL database of your own choosing. 
+
+###Flights
+
+We begin by loading the flights database into R from MySQL by creating a connection and downloading the tables.
+
+```{r MySQL, eval=TRUE}
+library(DBI)
+library(RMySQL)
+library(mongolite)
+library(knitr)
+
+flights_db = dbConnect(MySQL(), user='root', password= params$dbPassword, dbname='flights', host='localhost')
+dbListTables(flights_db)
+
+flights<-dbGetQuery(flights_db,"SELECT * FROM flights;")
+airlines<-dbGetQuery(flights_db,"SELECT * FROM airlines;")
+airports<-dbGetQuery(flights_db,"SELECT * FROM airports;")
+planes<-dbGetQuery(flights_db,"SELECT * FROM planes;")
+weather<-dbGetQuery(flights_db,"SELECT * FROM weather;")
+
+dbDisconnect(flights_db)
+```
+
+Next we load the tables into data frames in R.
+
+```{r dfTables, eval=TRUE}
+myflights <- data.frame(flights)
+myairlines <- data.frame(airlines)
+myairports <- data.frame(airports)
+myplanes <- data.frame(planes)
+myweather <- data.frame(weather)
+
+kable(head(myweather))
+```
+
+Now we can load these data frames into a MongoDB database using the mongolite package in R.
+
+```{r mongo, eval=TRUE}
+mongodb <- mongo(collection = "myflights", db = "flights_db", url = "mongodb://localhost",
+      verbose = FALSE, options = ssl_options())
+
+mongodb$insert(myflights)
+
+mongodb <- mongo(collection = "myairlines", db = "flights_db", url = "mongodb://localhost",
+                 verbose = FALSE, options = ssl_options())
+
+mongodb$insert(myairlines)
+
+mongodb <- mongo(collection = "myairports", db = "flights_db", url = "mongodb://localhost",
+                 verbose = FALSE, options = ssl_options())
+
+mongodb$insert(myairports)
+
+mongodb <- mongo(collection = "myplanes", db = "flights_db", url = "mongodb://localhost",
+                 verbose = FALSE, options = ssl_options())
+
+mongodb$insert(myplanes)
+
+mongodb <- mongo(collection = "myweather", db = "flights_db", url = "mongodb://localhost",
+                 verbose = FALSE, options = ssl_options())
+
+mongodb$insert(myweather)
+```
+
+And finally we query the mongodb data base to show that the tables where loaded the MondoDB.
+
+```{r mongodb_query, eval=TRUE}
+mongoflights <- mongodb$find(limit = 5)
+mongoflights
+
+```
+
+### Compare relational databases with NoSQL databases
+
+A relational database like MySQL uses tables which can be linked and queried using a structured query language. SQL databases are vertically scalable which allows for easliy increasing storage capacity. Some benefits of relational databases are maturity, compatibility, replicability, and cost effectivenes. 
+
+NoSQL databases are not table based, but rather store the data in column-oriented, document-oriented, graph-based or organized as a KeyValue store and therefore are more flexible in their format. The language used to query is a dynamic schema for unstructured data. A NoSQL database like MongoDB for example stores data in json form. NoSQL databases are horizontally scalable which allows for more traffic. Some benefits are scalability, manageablity, speed, and flexibility.
