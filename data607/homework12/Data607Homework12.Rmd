@@ -18,67 +18,85 @@ For this assignment, you should take information from a relational database and 
 We begin by loading the flights database into R from MySQL by creating a connection and downloading the tables.
 
 ```{r MySQL, eval=TRUE}
+#load libraries
 library(DBI)
 library(RMySQL)
 library(mongolite)
 library(knitr)
 
+#create a connection to the flights database in MySQL
 flights_db = dbConnect(MySQL(), user='root', password= params$dbPassword, dbname='flights', host='localhost')
 dbListTables(flights_db)
 
+#load the flights tables
 flights<-dbGetQuery(flights_db,"SELECT * FROM flights;")
 airlines<-dbGetQuery(flights_db,"SELECT * FROM airlines;")
 airports<-dbGetQuery(flights_db,"SELECT * FROM airports;")
 planes<-dbGetQuery(flights_db,"SELECT * FROM planes;")
 weather<-dbGetQuery(flights_db,"SELECT * FROM weather;")
 
+#end connection to MySQL
 dbDisconnect(flights_db)
 ```
 
 Next we load the tables into data frames in R.
 
 ```{r dfTables, eval=TRUE}
+#put flights tables into data frames
 myflights <- data.frame(flights)
 myairlines <- data.frame(airlines)
 myairports <- data.frame(airports)
 myplanes <- data.frame(planes)
 myweather <- data.frame(weather)
 
+#print the first few rows of the weather data frame
 kable(head(myweather))
 ```
 
 Now we can load these data frames into a MongoDB database using the mongolite package in R.
 
 ```{r mongo, eval=TRUE}
+#create a connection to MongoDB for the myflights data frame
 mongodb <- mongo(collection = "myflights", db = "flights_db", url = "mongodb://localhost",
       verbose = FALSE, options = ssl_options())
 
+#insert the myflights data frame 
 mongodb$insert(myflights)
 
+#create a connection to MongoDB for the myairlines data frame
 mongodb <- mongo(collection = "myairlines", db = "flights_db", url = "mongodb://localhost",
                  verbose = FALSE, options = ssl_options())
 
+#insert the myairlines data frame
 mongodb$insert(myairlines)
 
+
+#create a connection to MongoDB for the myairports data frame
 mongodb <- mongo(collection = "myairports", db = "flights_db", url = "mongodb://localhost",
                  verbose = FALSE, options = ssl_options())
 
+#insert the myairports data frame
 mongodb$insert(myairports)
 
+#create a connection to MongoDB for the myplanes data frame
 mongodb <- mongo(collection = "myplanes", db = "flights_db", url = "mongodb://localhost",
                  verbose = FALSE, options = ssl_options())
 
+#insert the myplanes data frame
 mongodb$insert(myplanes)
 
+#create a connection to MongoDB for the myweather data frame
 mongodb <- mongo(collection = "myweather", db = "flights_db", url = "mongodb://localhost",
                  verbose = FALSE, options = ssl_options())
 
+#insert the myweather data frame
 mongodb$insert(myweather)
 ```
 
 And finally we query the mongodb data base to show that the tables where loaded the MondoDB.
 
 ```{r mongodb_query, eval=TRUE}
+#query the flights mongodb to show that the flights table was inserted
 mongoflights <- mongodb$find(limit = 5)
 mongoflights
 

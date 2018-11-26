@@ -135,29 +135,37 @@ $(document).ready(function () {
 <div id="flights" class="section level3">
 <h3>Flights</h3>
 <p>We begin by loading the flights database into R from MySQL by creating a connection and downloading the tables.</p>
-<pre class="r"><code>library(DBI)
+<pre class="r"><code>#knit with parameters to be prompted for a MySQL password
+
+#load libraries
+library(DBI)
 library(RMySQL)
 library(mongolite)
 library(knitr)
 
+#create a connection to the flights database in MySQL
 flights_db = dbConnect(MySQL(), user='root', password= params$dbPassword, dbname='flights', host='localhost')
 dbListTables(flights_db)</code></pre>
 <pre><code>## [1] &quot;airlines&quot; &quot;airports&quot; &quot;flights&quot;  &quot;planes&quot;   &quot;weather&quot;</code></pre>
-<pre class="r"><code>flights&lt;-dbGetQuery(flights_db,&quot;SELECT * FROM flights;&quot;)
+<pre class="r"><code>#load the flights tables
+flights&lt;-dbGetQuery(flights_db,&quot;SELECT * FROM flights;&quot;)
 airlines&lt;-dbGetQuery(flights_db,&quot;SELECT * FROM airlines;&quot;)
 airports&lt;-dbGetQuery(flights_db,&quot;SELECT * FROM airports;&quot;)
 planes&lt;-dbGetQuery(flights_db,&quot;SELECT * FROM planes;&quot;)
 weather&lt;-dbGetQuery(flights_db,&quot;SELECT * FROM weather;&quot;)
 
+#end connection to MySQL
 dbDisconnect(flights_db)</code></pre>
 <pre><code>## [1] TRUE</code></pre>
 <p>Next we load the tables into data frames in R.</p>
-<pre class="r"><code>myflights &lt;- data.frame(flights)
+<pre class="r"><code>#put flights tables into data frames
+myflights &lt;- data.frame(flights)
 myairlines &lt;- data.frame(airlines)
 myairports &lt;- data.frame(airports)
 myplanes &lt;- data.frame(planes)
 myweather &lt;- data.frame(weather)
 
+#print the first few rows of the weather data frame
 kable(head(myweather))</code></pre>
 <table>
 <thead>
@@ -278,9 +286,11 @@ kable(head(myweather))</code></pre>
 </tbody>
 </table>
 <p>Now we can load these data frames into a MongoDB database using the mongolite package in R.</p>
-<pre class="r"><code>mongodb &lt;- mongo(collection = &quot;myflights&quot;, db = &quot;flights_db&quot;, url = &quot;mongodb://localhost&quot;,
+<pre class="r"><code>#create a connection to MongoDB for the myflights data frame
+mongodb &lt;- mongo(collection = &quot;myflights&quot;, db = &quot;flights_db&quot;, url = &quot;mongodb://localhost&quot;,
       verbose = FALSE, options = ssl_options())
 
+#insert the myflights data frame 
 mongodb$insert(myflights)</code></pre>
 <pre><code>## List of 5
 ##  $ nInserted  : num 336776
@@ -288,9 +298,11 @@ mongodb$insert(myflights)</code></pre>
 ##  $ nRemoved   : num 0
 ##  $ nUpserted  : num 0
 ##  $ writeErrors: list()</code></pre>
-<pre class="r"><code>mongodb &lt;- mongo(collection = &quot;myairlines&quot;, db = &quot;flights_db&quot;, url = &quot;mongodb://localhost&quot;,
+<pre class="r"><code>#create a connection to MongoDB for the myairlines data frame
+mongodb &lt;- mongo(collection = &quot;myairlines&quot;, db = &quot;flights_db&quot;, url = &quot;mongodb://localhost&quot;,
                  verbose = FALSE, options = ssl_options())
 
+#insert the myairlines data frame
 mongodb$insert(myairlines)</code></pre>
 <pre><code>## List of 5
 ##  $ nInserted  : num 16
@@ -298,9 +310,11 @@ mongodb$insert(myairlines)</code></pre>
 ##  $ nRemoved   : num 0
 ##  $ nUpserted  : num 0
 ##  $ writeErrors: list()</code></pre>
-<pre class="r"><code>mongodb &lt;- mongo(collection = &quot;myairports&quot;, db = &quot;flights_db&quot;, url = &quot;mongodb://localhost&quot;,
+<pre class="r"><code>#create a connection to MongoDB for the myairports data frame
+mongodb &lt;- mongo(collection = &quot;myairports&quot;, db = &quot;flights_db&quot;, url = &quot;mongodb://localhost&quot;,
                  verbose = FALSE, options = ssl_options())
 
+#insert the myairports data frame
 mongodb$insert(myairports)</code></pre>
 <pre><code>## List of 5
 ##  $ nInserted  : num 1397
@@ -308,9 +322,11 @@ mongodb$insert(myairports)</code></pre>
 ##  $ nRemoved   : num 0
 ##  $ nUpserted  : num 0
 ##  $ writeErrors: list()</code></pre>
-<pre class="r"><code>mongodb &lt;- mongo(collection = &quot;myplanes&quot;, db = &quot;flights_db&quot;, url = &quot;mongodb://localhost&quot;,
+<pre class="r"><code>#create a connection to MongoDB for the myplanes data frame
+mongodb &lt;- mongo(collection = &quot;myplanes&quot;, db = &quot;flights_db&quot;, url = &quot;mongodb://localhost&quot;,
                  verbose = FALSE, options = ssl_options())
 
+#insert the myplanes data frame
 mongodb$insert(myplanes)</code></pre>
 <pre><code>## List of 5
 ##  $ nInserted  : num 3322
@@ -318,9 +334,11 @@ mongodb$insert(myplanes)</code></pre>
 ##  $ nRemoved   : num 0
 ##  $ nUpserted  : num 0
 ##  $ writeErrors: list()</code></pre>
-<pre class="r"><code>mongodb &lt;- mongo(collection = &quot;myweather&quot;, db = &quot;flights_db&quot;, url = &quot;mongodb://localhost&quot;,
+<pre class="r"><code>#create a connection to MongoDB for the myweather data frame
+mongodb &lt;- mongo(collection = &quot;myweather&quot;, db = &quot;flights_db&quot;, url = &quot;mongodb://localhost&quot;,
                  verbose = FALSE, options = ssl_options())
 
+#insert the myweather data frame
 mongodb$insert(myweather)</code></pre>
 <pre><code>## List of 5
 ##  $ nInserted  : num 8719
@@ -329,7 +347,8 @@ mongodb$insert(myweather)</code></pre>
 ##  $ nUpserted  : num 0
 ##  $ writeErrors: list()</code></pre>
 <p>And finally we query the mongodb data base to show that the tables where loaded the MondoDB.</p>
-<pre class="r"><code>mongoflights &lt;- mongodb$find(limit = 5)
+<pre class="r"><code>#query the flights mongodb to show that the flights table was inserted
+mongoflights &lt;- mongodb$find(limit = 5)
 mongoflights</code></pre>
 <pre><code>##   origin year month day hour  temp  dewp humid wind_dir wind_speed
 ## 1    EWR 2013     1   1    0 37.04 21.92 53.97      230   10.35702
