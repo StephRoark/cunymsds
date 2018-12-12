@@ -303,7 +303,7 @@ The number of perfect weather days which fall on weekends is `r nrow(temp_filter
 
 ###Events
 
-We need data on events in the area which we can obtain from Seattle Open Data:
+We need data on events in the area which we can obtain from a local events website:
 
 [Seattle Special Events Data]("https://www.events12.com/seattle/")
 
