@@ -1,0 +1,129 @@
+---
+title: "Data 605 Assignment 2"
+author: "Stephanie Roark"
+date: "2/10/2019"
+output:
+  pdf_document:
+    latex_engine: xelatex
+  html_document:
+    highlight: pygments
+    theme: cosmo
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE)
+```
+
+##1. Problem Set 1
+
+####(1) Show that A^T^A != AA^T^ in general. (Proof and demonstration.)
+
+If A is an m × n matrix and A^T^ is its transpose, then the result of matrix multiplication with these two matrices gives two square matrices: AA^T^ is m × m and A^T^A is n × n. Since an mxm matrix cannot be equavilent to an nxn matrix if m!=n, A^T^A != AA^T^.
+
+```{r transpose A}
+A <- matrix(c(1,2,3,4,5,6,7,8,9),nrow = 3)
+A
+
+A_T <- t(A)
+A_T
+
+identical(A, A_T)
+
+A %*% A_T == A_T %*% A
+```
+
+####(2) For a special type of square matrix A, we get A^T^A = AA^T^. Under what conditions could this be true? 
+
+#####The Identity matrix I is an example of such a matrix.
+ 
+```{r transpose AI}
+AI <- matrix(c(1,0,0,0,1,0,0,0,1),nrow = 3)
+AI
+
+AI_T <- t(AI)
+AI_T
+
+identical(AI, AI_T)
+
+AI %*% AI_T == AI_T %*% AI 
+```
+
+
+#####This will also be true whenever A = A^T^.
+
+```{r AT2}
+A2 <- matrix(c(1,3,4,3,2,3,4,3,1), nrow = 3)
+A2
+
+A2_T <- t(A2)
+A2_T
+
+identical(A2, A2_T)
+
+A2 %*% A2_T == A2_T %*% A2 
+```
+
+##2. Problem set 2
+
+Matrix factorization is a very important problem. There are supercomputers built just
+to do matrix factorizations. Every second you are on an airplane, matrices are being
+factorized. Radars that track flights use a technique called Kalman filtering. At the heart
+of Kalman Filtering is a Matrix Factorization operation. Kalman Filters are solving linear
+systems of equations when they track your flight using radars.
+
+####Write an R function to factorize a square matrix A into LU or LDU, whichever you prefer. 
+
+Factorize A into a product of two matrices: A = LU where U is the matrix that we get at the end of the elimination procedure, it is the Upper Triangular matrix. L is a Lower Triangular matrix and you’ll see that the entries of L are the multipliers that we applied to subtract one row from the other.
+
+#####LU Decomposition
+
+```{r LU}
+#define a matrix a
+a <- matrix(sample (25), 5, 5)
+a
+#define Gaussian Elimination function to compute matrix with row reductions
+Gauss_Elim <- function(a) {
+    n <- nrow(a)
+    #create an augmented matrix with a and the identity
+    a <- cbind(a,diag(n))
+    
+    #multiply a row by a constant    
+    for (i in 1 : n) {
+        c <- diag(n)
+        c[i, i] <- (1 / a[i, i])
+        a <- c %*% a
+       
+        #if at the last row, stop
+        if (i == n) {
+            break ()
+        }
+        #add a multiple of a row to a different row
+        for (j in (i + 1) : n) {
+            r <- diag(n)
+            r[j, i] <- (- a[j, i])
+            a <- r %*% a    
+        }
+    }
+    return(a)
+}
+#call Gauss Elimination function on matrix a
+Gauss_Elim(a)
+
+#use Gauss_Elim() to compute Upper Triangular Matrix and Lower Triangular Matrix
+
+#define LU Decomposition function
+LU_decomp <- function(a) {
+    n <- nrow (a)
+    #compute the U matrix (Upper Triangular)
+    g <- Gauss_Elim(a)
+    #compute the L matrix (Lower Triangular) with multipliers located below the diagonal 
+    h <- Gauss_Elim(g[, n + 1 : n])
+    return(list(L = h[, n + 1 : n], U = g[, 1 : n]))
+}
+
+print(LU <- LU_decomp(a))
+#show that the LU decomp is equal to matrix a
+LU $ L %*% LU $ U
+```
+
+
