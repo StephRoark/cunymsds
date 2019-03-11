@@ -1,0 +1,144 @@
+---
+title: "DiscussionWeek3"
+author: "Stephanie Roark"
+date: "2/13/2019"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: cosmo
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE)
+```
+
+## EE.C26
+
+For matrix  
+$$A =
+\begin{bmatrix} 
+2 & 1 & 1 \\
+1 & 2 & 1 \\ 
+1 & 1 & 2 \\ 
+\end{bmatrix}
+$$
+
+the characteristic polynomial of A is $^PA(x)=(4-x)(1−x)^2$
+Find the eigenvalues and corresponding eigenspaces of A.
+
+###Solution:
+
+$Av = λv$
+$(λI^n - A) v = 0v$
+$det(λI^n -A) = 0$
+
+$$λI^3 - A =
+\begin{bmatrix} 
+λ-2 & -1 & -1 \\
+-1 & λ-2 & -1 \\ 
+-1 & -1 & λ-2 \\ 
+\end{bmatrix}
+$$
+
+$$λI^3 - A =
+\begin{bmatrix} 
+λ-2 & -1 & -1 \\
+-1 & λ-2 & -1 \\ 
+-1 & -1 & λ-2 \\ 
+\end{bmatrix}
+*
+\begin{bmatrix} 
+λ-2 & -1 \\
+-1 & λ-2 \\ 
+-1 & -1  \\ 
+\end{bmatrix}
+$$
+
+$=(λ-2)(λ-2)(λ-2) + (-1)(-1)(-1) + (-1)(-1)(-1) - (-1)(-1)(λ-2) - (λ-2)(-1)(-1) - (-1)(λ-2)(-1)$
+
+$p((λ) = λ^3 - 6λ^2 +9λ - 4 = 0$
+
+Factoring the polynomial gives us $(λ-4)(λ-1)(λ-1)$
+
+Eigenvalues are λ=4 and λ=1.
+
+Eigenvectors:
+
+for 
+
+
+for λ = 4, 
+$$
+\begin{bmatrix} 
+ 2 & -1 & -1\\
+-1 & 2 & -1 \\ 
+-1 & -1 & 2 \\ 
+\end{bmatrix}
+$$
+
+RREF for λ = 4 is 
+
+$$
+\begin{bmatrix} 
+ 1 & 1 &  1 \\
+ 0 & 0 & 0  \\ 
+ 0 & 0 & 0  \\
+\end{bmatrix}
+$$
+
+and the eigenspace is 
+
+$$
+\begin{bmatrix} 
+ 1 \\
+ 1 \\ 
+ 1 \\
+\end{bmatrix}
+$$
+
+
+```{r eigen4}
+a = matrix(c(2,-1,-1,-1,2,-1,-1,-1,2), nrow = 3)
+eigen(a)
+```
+
+for λ = 1, 
+$$
+\begin{bmatrix} 
+-1 & -1 & -1\\
+-1 & -1 & -1 \\ 
+-1 & -1 & -1 \\ 
+\end{bmatrix}
+$$
+RREF for λ = 1 is 
+
+$$
+\begin{bmatrix} 
+-1 &-1 & -1 \\
+ 0 & 0 & 0  \\ 
+ 0 & 0 & 0  \\
+\end{bmatrix}
+$$
+
+and the eigenspace is 
+
+$$
+\begin{bmatrix} 
+ 1 \\
+-1 \\ 
+ 0 \\
+\end{bmatrix}
+$$
+$$
+\begin{bmatrix} 
+ 1 \\
+ 0 \\ 
+-1 \\
+\end{bmatrix}
+$$
+
+```{r eigen1}
+a = matrix(c(-1,-1,-1,-1,1,-1,-1,-1,1), nrow = 3)
+eigen(a)
+```
