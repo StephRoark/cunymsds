@@ -1,0 +1,236 @@
+---
+title: "Assignment 6"
+author: "Stephanie Roark"
+date: "3/10/2019"
+output:
+  pdf_document:
+    latex_engine: xelatex
+  html_document:
+    highlight: pygments
+    theme: cosmo
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE)
+```
+
+
+1. A box contains 54 red marbles, 9 white marbles, and 75 blue marbles. If a marble is randomly selected from the box, what is the probability that it is red or blue? Express your answer as a fraction or a decimal number rounded to four decimal places.
+
+```{r marbles}
+red_marbles <- 54
+white_marbles <- 9
+blue_marbles <- 75
+total_marbles <- red_marbles + white_marbles + blue_marbles
+
+P_rb <- (red_marbles + blue_marbles)/total_marbles
+round(P_rb,4)
+```
+
+2. You are going to play mini golf. A ball machine that contains 19 green golf balls, 20 red golf balls, 24 blue golf balls, and 17 yellow golf balls, randomly gives you your ball. What is the probability that you end up with a red golf ball? Express your answer as a simplified fraction or a decimal rounded to four decimal places.
+
+```{r golf}
+green_gballs <- 19
+red_gballs <- 20
+blue_gballs <- 24
+yellow_gballs <- 17
+total_gballs <- green_gballs + red_gballs + blue_gballs + yellow_gballs
+
+P_r <- red_gballs/ total_gballs
+round(P_r, 4)
+```
+
+3. A pizza delivery company classifies its customers by gender and location of residence. The research department has gathered data from a random sample of 1399 customers. The data is summarized in the table below.
+
+```{r table, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl <- "  
+
+| Gender and Residence of Customers | Male     | Females  |
+|-----------------------------------|:--------:|---------:|
+| Apartment                         |  81      | 228      |
+| Dorm                              | 116      |  79      |
+| With Parent(s)                    | 215      | 252      |
+| Sorority/Fraternity House         | 130      |  97      |
+| Other                             | 129      |  72      |
+"
+cat(tabl) 
+```
+
+What is the probability that a customer is not male or does not live with parents? Write your answer as a fraction or a decimal number rounded to four decimal places.
+
+```{r pizza}
+apt_fem <- 228
+dorm_fem <- 79
+sor_fem <- 97
+other_fem <- 72
+total_fem <- c(228, 79, 252, 97, 72)
+total_male <- c(81, 116, 215, 130, 129)
+total_customers <- sum(total_fem) + sum(total_male)
+
+P_F_nP <- (apt_fem + dorm_fem + sor_fem + other_fem)/total_customers
+round(P_F_nP,4)
+```
+
+4. Determine if the following events are independent.
+Going to the gym. Losing weight.
+
+Answer:  A) Dependent   B) Independent
+
+These events are related or A) Dependent. The probability of losing wait can and probably does depend on going to the gym. 
+
+5. A veggie wrap at City Subs is composed of 3 different vegetables and 3 different condiments wrapped up in a tortilla. If there are 8 vegetables, 7 condiments, and 3 types of tortilla available, how many different veggie wraps can be made?
+
+${8 \choose 3}* {7 \choose 3} * {3 \choose 1}$
+
+```{r }
+veggie_wrap <- choose(8,3) * choose(7,3) * choose(3,1)
+veggie_wrap
+```
+
+6. Determine if the following events are independent.
+Jeff runs out of gas on the way to work. Liz watches the evening news.
+
+Answer:  A) Dependent   B) Independent
+
+These events are independent B) as they are not dependent on each other to occur. The probability of each event occuring is not affected by the other event.
+
+7. The newly elected president needs to decide the remaining 8 spots available in the cabinet he/she is appointing. If there are 14 eligible candidates for these positions (where rank matters), how many different ways can the members of the cabinet be appointed?
+
+$n!/(n-k)!$
+
+```{r pres}
+factorial(14)/factorial(14-8)
+```
+
+8. A bag contains 9 red, 4 orange, and 9 green jellybeans. What is the probability of reaching into the bag and randomly withdrawing 4 jellybeans such that the number of red ones is 0, the number of orange ones is 1, and the number of green ones is 3? Write your answer as a fraction or a decimal number rounded to four decimal places.
+
+```{r jelly}
+red_jbeans <- 9
+orange_jbeans <- 4
+green_jbeans <- 9
+total_jbeans <- red_jbeans + orange_jbeans + green_jbeans
+
+way1 <- orange_jbeans/total_jbeans*green_jbeans/(total_jbeans-1)*(green_jbeans-1)/(total_jbeans-2)*(green_jbeans-2)/(total_jbeans-3)
+
+way2 <- green_jbeans/total_jbeans*orange_jbeans/(total_jbeans-1)*(green_jbeans-1)/(total_jbeans-2)*(green_jbeans-2)/(total_jbeans-3)
+
+way3 <- green_jbeans/total_jbeans*(green_jbeans-1)/(total_jbeans-1)*(orange_jbeans)/(total_jbeans-2)*(green_jbeans-2)/(total_jbeans-3)
+
+way4 <- green_jbeans/total_jbeans*(green_jbeans-1)/(total_jbeans-1)*(green_jbeans-2)/(total_jbeans-2)*(orange_jbeans-2)/(total_jbeans-3)
+
+P_1o_3g <- way1 + way2 + way3 + way4
+round(P_1o_3g,4)    
+```
+
+9. Evaluate the following expression.
+        11!/7!
+```{r fact}
+factorial(11)/factorial(7)
+```
+
+10. Describe the complement of the given event.
+
+67% of subscribers to a fitness magazine are over the age of 34. 
+
+33% of subscribers are less than or equal to the age of 34.
+
+11. If you throw exactly three heads in four tosses of a coin you win 97 dollars. If not, you pay me 30 dollars.
+
+Step 1. Find the expected value of the proposition. Round your answer to two decimal places.
+
+$b(n, p, j) = {n \choose j}p^jq^n−j$ where $q = (1-p)$
+
+= ${4 \choose 3}(1/2)^3*(1/2)^1$
+
+```{r toss1}
+P_success <- choose(4,3)*(1/2)**3*(1/2)
+P_failure <- 1 - choose(4,3)*(1/2)**3*(1/2)
+exp_val <- 97*P_success - 30*P_failure
+exp_val
+```
+
+Step 2. If you played this game 559 times how much would you expect to win or lose? (Losses must be entered as negative.)
+
+Win:
+
+```{r exp_val1}
+exp_val*559
+```
+
+12. Flip a coin 9 times. If you get 4 tails or less, I will pay you $23. Otherwise you pay me $26.
+
+Step 1. Find the expected value of the proposition. Round your answer to two decimal places.
+
+$b(n, p, j) = {n \choose j}p^jq^n−j$ where $q = (1-p)$
+
+```{r toss2}
+P_0tails <-  choose(9,0)*(1/2)**0*(1/2)**9
+P_1tails <-  choose(9,1)*(1/2)**1*(1/2)**8
+P_2tails <-  choose(9,2)*(1/2)**2*(1/2)**7
+P_3tails <-  choose(9,3)*(1/2)**3*(1/2)**6
+P_4tails <-  choose(9,4)*(1/2)**4*(1/2)**5
+P_success2 <- P_0tails + P_1tails + P_2tails + P_3tails + P_4tails
+P_failure2 <- 1 - P_success
+exp_val2 <- 23*P_success2 - 26*P_failure2
+exp_val2
+```
+
+Step 2. If you played this game 994 times how much would you expect to win or lose? (Losses must be entered as negative.)
+
+Lose: 
+
+```{r exp_val2}
+exp_val2*994
+```
+
+
+13. The sensitivity and specificity of the polygraph has been a subject of study and debate for years. A 2001 study of the use of polygraph for screening purposes suggested that the probability of detecting a liar was .59 (sensitivity) and that the probability of detecting a "truth teller" was .90 (specificity). We estimate that about 20% of individuals selected for the screening polygraph will lie.
+
+a. What is the probability that an individual is actually a liar given that the polygraph detected him/her as such? (Show me the table or the formulaic solution or both.)
+
+$P(A^c)$ = P(detTruth) = specifity = 0.9
+
+$P(A)$ = P(detliar) = sensitivity = 0.59
+
+$P(B)$ = P(liar) = .2 testers are liars
+
+$P(B^c)$ = P(truth) = .8 testers are truth tellers
+
+
+$P(B|A) = P(A|B)P(B)/(P(A|B)P(B) + P(A|B^c)(P(B^c))$
+ 
+= $sensitivity * P(B)/((sensitivity * P(B) + (1-specifity)(1 - P(B)))$
+
+= $(0.59 * 0.2)/((0.59*0.2) + 0.1 * 0.8)$
+
+P(detLiar|lair) = `r (0.59 * 0.2)/((0.59*0.2) + 0.1 * 0.8)`
+
+b. What is the probability that an individual is actually a truth-teller given that the polygraph detected him/her as such? (Show me the table or the formulaic solution or both.)
+
+$P(A^c)$ = specifity = 0.9
+
+$P(A)$ = sensitivity = 0.59
+
+$P(B^c)$ = .2 testers are liars
+
+$P(B)$ = .8 testers are truth tellers
+
+$P(B|A) = P(A|B)P(B)/(P(A|B)P(B) + P(A|B^c)(P(B^c))$
+ 
+= $sensitivity * P(B)/((sensitivity * P(B) + (1-specifity)(1 - P(B)))$
+
+= $(0.59*0.8)/((0.59*0.8) + (1-0.9)*(1-(0.8)))$
+
+P(detTruth|truth) =`r (0.59*0.8)/((0.59*0.8) + (1-0.9)*(1-(0.8)))`
+
+c. What is the probability that a randomly selected individual is either a liar or was identified as a liar by the polygraph? Be sure to write the probability statement.
+
+P(liar) U (P(liar) U P(truth|detLiar))
+
+P(liar) = 0.2
+
+P(truth|detLiar) = 1 - P(detLiar|lair) = `r 1 - ((0.59 * 0.2)/((0.59*0.2) + 0.1 * 0.8))`
+
+P(liar) + P(truth|detLiar) = 0.2 + (1 - ((0.59 * 0.2)/((0.59*0.2) + 0.1 * 0.8)))
+
+= `r 0.2 + (1 - ((0.59 * 0.2)/((0.59*0.2) + 0.1 * 0.8)))`

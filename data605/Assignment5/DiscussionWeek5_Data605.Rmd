@@ -1,0 +1,41 @@
+---
+title: "DiscussionWeek5_Data605"
+author: "Stephanie Roark"
+date: "2/27/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE)
+```
+
+## Chapter 1.2
+
+6. A die is loaded in such a way that the probability of each face turning up
+is proportional to the number of dots on that face. (For example, a six is
+three times as probable as a two.) What is the probability of getting an even
+number in one throw?
+
+d=dot
+
+even dots are 2d, 4d, 6d
+
+So, we are looking for the probability $P(2d) + P(4d) + P(6d)$
+
+$6m(1d) = 5m(2d) = 4m(3d) = 3m(4d) = 2m(5d) = 1m(6d)$
+
+$6m(1d) + 5m(2d) + 4m(3d) + 3m(4d) + 2m(5d) + m(6d) = 1$
+
+$1/6m(6d) + 2/6m(6d) + 3/6m(6d) + 4/6m(6d) + 5/6m(6d) + 6/6m(6d) = 1$
+
+$21/6m(6d) = 1$
+
+$m(6d) = 6/21$
+
+$m(4d) = (6/21) / (6/4) = 4/21$
+
+$m(2d) = (6/21) / (6/2) = 2/21$
+
+$P(2d) + P(4d) + P(6d) = 6/21 + 4/21 + 2/21 = 12/21$
+
+The probability of an even roll of a dice is 12/21 or `r round(12/21,2)`%.

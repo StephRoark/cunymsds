@@ -1,0 +1,164 @@
+---
+title: "Assignment 5"
+author: "Stephanie Roark"
+date: "3/3/2019"
+output:
+  pdf_document:
+    latex_engine: xelatex
+  html_document:
+    highlight: pygments
+    theme: cosmo
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE)
+```
+
+## Probability
+
+Choose independently two numbers B and C at random from the interval [0, 1] with
+uniform density. Prove that B and C are proper probability distributions.
+Note that the point (B,C) is then chosen at random in the unit square.
+
+###Continuous Probability Distribution
+
+If a random variable is a continuous variable , its probability distribution is called a continuous probability distribution .
+
+The equation used to describe a continuous probability distribution is called a probability density function (pdf). All probability density functions satisfy the following conditions:
+
+- The graph of this density function will be continuous over its range. This is because it is defined over a continuous variable and also continuous range of values.
+
+- The area that is covered under the curve that is produced by this density function and the x- axis is always equal to 1, when it is evaluated over the variable’s domain values.
+
+- The probability of the assumption of values of random variable to lie between ‘c’ and ‘d’ is simply equal to the area that is bounded by the density function’s curve under the points ‘c’ and ‘d’.
+
+
+Let X be a continuous real-valued random variable. A density
+function for X is a real-valued function f which satisfies
+
+$P(a \leq X \leq b) = \int_a^b \! f(x) \, \mathrm{d}x$
+
+for all $a, b \in \mathbb{R}$ 
+
+So, for $F_z(z)=P(B < z)$
+
+$\! F_z(z) \ =$ { 0 if z $\leq$ 0 , 1 if 0 $\leq$ z $\leq$ 1, 0 if z $\geq$ 1 
+
+
+$\int_0^1 \! f_z(z) \, \mathrm{d}z = \int_0^1 \! 1 \, \mathrm{d}z = 1$ on the continuous interval from 0 to 1. B and C are continuous on the interval from 0 to 1 and the area covered under the curve is equal to 1, so the first 2 requirements are satifisfied that B and C are proper probability distributions. The density functions which equal the area are shown below. 
+
+
+###Find the probability that
+
+Consider a random variable, defined to be the sum of two random real numbers B and C chosen uniformly from [0, 1]. 
+
+####(a) B + C < 1/2.
+
+Let the random variables X and Y denote the two chosen real numbers. Define Z = X + Y . Our sample space Ω the unit square in $R^2$ with uniform density and 0 $\leq$ Z $\leq$ 2. 
+
+$\ P(B + C < 1/2)\ $ = area of the event where B + C < 1/2
+
+ = 0 if $z < 0$, $(1/2)Z^2$ if $0 \leq z \leq 1$, $1 - (1/2)(2-z)^2$ if $1 \leq z \leq 2$, 1 if $2 < z$
+ 
+ The probability density function $\! F_z(z) \ =$ 0 if $z < 0$, z if $0 \leq z \leq 1$, $2 - z$ if $1 \leq z \leq 2$, 0 if $2 < z$
+ 
+The area of B + C < 1/2 is the area of a triangle of 1/2 X 1/2 x 1/2 = 1/8.
+ 
+###Area of B + C < 1/2
+ 
+```{r plt1}
+B = runif(10000, min=0, max=1)
+C = runif(10000, min=0, max=1)
+keep = (B + C) < (1/2)
+x = B[keep]
+y = C[keep]
+plot(x, y, xlim=c(0, 1), ylim=c(0, 1))
+```
+
+The simulation based estimate of the probability is determined by the number of
+points that were within the region defined by the probability formula divided by
+the total number of points simultated.  This is a crude form of numerical integration
+and can be used for validation of the analytic solution.
+
+```{r estimated1}
+sum(keep)/10000
+```
+
+####(b) BC < 1/2.
+
+$\ P(B * C < 1/2)\ $ = area of the event where B * C < 1/2
+
+= 0 if $z \leq 0$, z if $0 \leq z \leq 1/2$, 1/2 + $\int_{1/2}^1 \! {1/2z} \ dz$ if $1/2 \leq z \leq 1$, 1 if $z \leq 1$
+
+The probability density function equals the area = `r 1/2 + log(2)/2`
+
+####Area of B * C < 1/2
+
+```{r plt2}
+keep = (B * C) < (1/2)
+x = B[keep]
+y = C[keep]
+plot(x, y, xlim=c(0, 1), ylim=c(0, 1))
+sum(keep)/10000
+```
+
+####(c) |B − C| < 1/2.
+
+$\ P(|X - Y| < z)\ $ = $\ P(|B - C| < 1/2)\ $ = area of the event where |B - C| < 1/2
+
+= 0 if $z \leq 0$, $(1 - (1 - z)^2$ if $0 \leq z \leq 1$, 1 if $z > 1$
+
+and the density function is $\! F_z(z) \ =$ 0 if $z \leq 0$, $2(1 - z)$ if $0 \leq z \leq 1$, 0 if $z > 1$
+
+We can see from the plot below that the area of |B - C| < 1/2 is a trapezoid and we can calculate the area by subtracting the impossible values of |B - C| < 1/2.
+
+Area = 1 - 2*(1/8) = 3/4
+
+####Area of |B - C| < 1/2 
+```{r plt3}
+keep = abs(B - C) < (1/2)
+x = B[keep]
+y = C[keep]
+plot(x, y, xlim=c(0, 1), ylim=c(0, 1))
+sum(keep)/10000
+```
+
+####(d) max{B,C} < 1/2.
+
+$\ P(max(X,Y) < z)\ $ =  $\ P(max(B,C) < 1/2)\ $ = area of the event where max{B,C} < 1/2
+
+= 0 if $z \leq 0$, $2z$ if $0 \leq z \leq 1$, 0 if $z > 1$
+
+and the probability function is $\! F_z(z) \ =$ 0 if $z < 0$, $z^2$ if $0 \leq z \leq 1$, 0 if $z > 1$
+
+Area of the square of max{B,C} < 1/2 = 1/2 * 1/2 = 1/4
+
+####Area of max{B,C} < 1/2
+
+```{r plt4}
+keep = pmax(B,C, na.rm=TRUE) < (1/2)
+x = B[keep]
+y = C[keep]
+plot(x, y, xlim=c(0, 1), ylim=c(0, 1))
+sum(keep)/10000
+```
+
+####(e) min{B,C} < 1/2.
+
+$\ P(min(X,Y) < z)\ $ =  $\ P(min(B,C) < 1/2)\ $ = area of the event where min{B,C} < 1/2
+
+= 0 if $z \leq 0$, $2 - 2z$ if $0 \leq z \leq 1$, 0 if $z > 1$
+
+and the probability function is $\! F_z(z) \ =$ 0 if $z < 0$, $2z - 2z^2$ if $0 \leq z \leq 1$, 0 if $z > 1$
+
+Area of min{B,C} < 1/2 = 1 - 1/4 = 3/4
+
+####Area of min{B,C} < 1/2
+
+```{r plt5}
+keep = pmin(B,C, na.rm=TRUE) < (1/2)
+x = B[keep]
+y = C[keep]
+plot(x, y, xlim=c(0, 1), ylim=c(0, 1))
+sum(keep)/10000
+```
